@@ -1,7 +1,5 @@
-<<<<<<< HEAD
 .env
 .DS_Store
-=======
 # --- Secrets ---
 # NEVER commit your API keys or secret files.
 .env
@@ -33,4 +31,3 @@ __pycache__/
 
 
 embeddings.pt
->>>>>>> recovered-work

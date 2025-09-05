@@ -45,7 +45,7 @@ def fetch_weather_by_town(town_name: str):
 
 def fetch_weather_forecast_by_town(town_name: str):
     """
-    Fetches a 5-DAY, 3-HOUR forecast, including rain probability, for a specific town.
+    Fetches a 5-DAY, 3-HOUR forecast, including rain probability and wind speed, for a specific town.
     """
     if not OPENWEATHER_API_KEY:
         raise Exception("OpenWeatherMap API key is not set in the .env file.")
@@ -64,6 +64,7 @@ def fetch_weather_forecast_by_town(town_name: str):
             forecast_list.append({
                 "datetime": entry["dt_txt"],
                 "temperature_celsius": entry["main"]["temp"],
+                "wind_speed_mps": entry["wind"]["speed"],  # Added wind speed
                 # 'pop' is the Probability of Precipitation
                 "rain_chance_percent": entry["pop"] * 100,
                 "description": entry["weather"][0]["description"].title()
@@ -79,4 +80,3 @@ def fetch_weather_forecast_by_town(town_name: str):
         raise Exception(f"API request failed: {e.response.status_code}")
     except Exception as e:
         raise Exception(f"An error occurred: {str(e)}")
-

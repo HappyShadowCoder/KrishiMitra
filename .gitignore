@@ -1,0 +1,36 @@
+<<<<<<< HEAD
+.env
+.DS_Store
+=======
+# --- Secrets ---
+# NEVER commit your API keys or secret files.
+.env
+*.env
+
+# --- Python ---
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# Cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- IDE & OS specific files ---
+.vscode/
+.idea/
+.DS_Store
+
+# --- Data & Model Files (Optional) ---
+# It's good practice to not commit large data or model files to Git.
+# For your hackathon, you can leave these commented out to include them.
+# In a larger project, you would use a tool like Git LFS for these.
+*.csv
+*.pkl
+
+
+embeddings.pt
+>>>>>>> recovered-work

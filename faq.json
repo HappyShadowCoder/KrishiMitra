@@ -386,5 +386,45 @@
   {
     "query": "Help me get rid of locusts.",
     "answer": "Namaste!  I'm Krishi Mitra.  Unfortunately, the provided information doesn't give me any specific advice on controlling locusts.  The text discusses other pests like mealybugs, leafhoppers, and the red hairy caterpillar, along with management strategies for them.  To help you with locust control, I'll need more information.\n"
+  },
+  {
+    "query": "How to control locust?",
+    "answer": "The provided text doesn't offer any information on controlling locusts.  I'm sorry I can't help you with that.\n"
+  },
+  {
+    "query": "hello",
+    "answer": "Hello!  How can I help you today with your farming needs?\n"
+  },
+  {
+    "query": "See",
+    "answer": "I'm sorry, but I cannot answer your question.  The provided text contains copyright information, a partial list of locations and climate data for Tamil Nadu, and an uninterpretable string of text.  There is no information to help me understand what you mean by \"See\".  Please provide more context or a clearer question.\n"
+  },
+  {
+    "query": "hi",
+    "answer": "Hi there!  How can I help you today with your farming needs?\n"
+  },
+  {
+    "query": "How to grow rice?",
+    "answer": "Hello!  There are several ways to grow rice, depending on the type of rice and the conditions.\n\nFor **transplanted puddled lowland rice**, you'll need a nursery.  For one hectare, prepare a 20-cent (800 m²) nursery near a water source. Seed rates vary from 30 kg (long duration) to 60 kg (short duration), and 20kg for hybrids.  Treat seeds with Carbendazim, Pyroquilon, or Tricyclozole (2 g/l water per kg seeds), soak for 10 hours, and drain excess water.\n\nAlternatively, for the **System of Rice Intensification (SRI)**, a dry season with assured irrigation is best. Use hybrids or varieties with heavy tillering.  Prepare a 100 m² nursery for one hectare, on a level area near water, using a plastic sheet or bags to prevent deep root growth. Mix 70% soil, 20% pressmud/bio-gas slurry/FYM, and 10% rice hull. Add fertilizer (1.5 kg DAP or 2 kg 17-17-17 NPK).  Seed rates are 5-7 kg/ha for single seedlings or 12-15 kg/ha for two seedlings per hill if establishment is difficult.\n\nFor **aerobic rice**, use a variety like PMK (R) 3 and aim for 50 hills per m² (20 x 10 cm spacing).  \n\nRemember, grain yield depends on moisture and nutrient levels.  You can also consider intercropping blackgram with rice (one row of blackgram for every four rows of rice).  Specific nutrient application will depend on growth stage and moisture levels.  For semi-dry rice, follow the recommendations for that section. Using PPFM (Pink Pigmented Facultative Microbes) can help with terminal drought.  Finally, you could try the seedling throwing method for short-duration varieties,  throwing 20-day-old seedlings into a puddled field; this saves labor compared to line planting.\n"
+  },
+  {
+    "query": "How are you?",
+    "answer": "Namaste! I'm doing well, thank you for asking.  How can I help you today?\n"
+  },
+  {
+    "query": "what are you doing?",
+    "answer": "Namaste!  As Krishi Mitra, I'm not doing anything specific based on this text. This document appears to be copyright information and excerpts from an agricultural textbook, not something I'm actively working on.  I'm ready to answer your questions about agriculture in India, though!  Just let me know what you'd like to know.\n"
+  },
+  {
+    "query": "How to grow wheat?",
+    "answer": "Namaste!  To grow wheat, first plough the field thoroughly to a fine tilth.  Then, apply 12.5 t/ha of FYM or compost.  Treat your seeds with 2 g of Carbendazim or Thiram per kg of seeds 24 hours before sowing.  The recommended seed rate is 100 kg/ha.  Plant using line planting with 45 cm spacing between rows and 10 cm between plants. Weed once at 15 days after sowing (DAS) and again at 40 DAS. Thin the plants soon after weeding, or before 20 DAS.  Generally, wheat has few pest and disease problems.\n"
+  },
+  {
+    "query": "DAS full form?",
+    "answer": "Namaste!  I'm Krishi Mitra.  Unfortunately, the provided text doesn't contain the full form of DAS.  I can only offer information on soil horizons and their classifications.  Is there anything else I can help you with regarding soil science or agriculture in India?\n"
+  },
+  {
+    "query": "How to increase yield of crop",
+    "answer": "Namaste!  As Krishi Mitra, I can tell you that low yields are often due to overcrowding, poor manuring, and insufficient irrigation. To boost your harvest, we need to address these issues.\n\nFirst, **thin out overcrowded gardens**. If you have too many plants, many will produce less than 20 nuts per palm per year.  Removing the lower-yielding plants, aiming for 175 palms per hectare, will significantly improve the yield of the remaining healthy ones and reduce cultivation costs.\n\nSecond,  ensure **adequate manuring and irrigation**. Following recommended practices for fertilization, watering, and general crop care will increase your yield.  Finally, remember that leaving crop residue in the field instead of harvesting it will increase the organic matter in your soil, leading to healthier and more productive plants in the long run.  Also, consider the type of cropping system. While continuous cropping might seem profitable initially, yields often decline over time, increasing the need for fertilizers, herbicides, and pesticides.\n"
   }
 ]

@@ -1,16 +1,11 @@
 torch~=2.2.2
+torchvision~=0.17.2
 sentence-transformers~=5.1.0
 pypdf~=6.0.0
 pandas~=2.3.2
-<<<<<<< HEAD
-scikit-learn
-numpy~=1.26.4
-joblib
-=======
 scikit-learn~=1.7.1
 numpy~=1.26.4
 joblib~=1.5.2
->>>>>>> recovered-work
 h11~=0.16.0
 pip~=25.2
 filelock~=3.19.1
@@ -45,13 +40,9 @@ httplib2~=0.30.0
 pyparsing~=3.2.3
 uritemplate~=4.2.0
 google-auth-httplib2~=0.2.0
-<<<<<<< HEAD
-python-dotenv~=1.1.1
-=======
 python-dotenv~=1.1.1
 fastapi~=0.116.1
 optuna~=4.5.0
 shap~=0.48.0
 matplotlib~=3.10.6
 lightgbm~=4.6.0
->>>>>>> recovered-work

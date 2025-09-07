@@ -1,6 +1,18 @@
+// Home.jsx (Final and Complete Code)
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Leaf, Loader2, MapPin, ArrowLeft, Tractor } from "lucide-react";
+import {
+  Bot,
+  Leaf,
+  Loader2,
+  MapPin,
+  ArrowLeft,
+  Tractor,
+  Camera,
+  ImageIcon, // <-- NEW
+  Mic, // <-- NEW
+  Send, // <-- NEW
+} from "lucide-react";
 import Weather from "./Weather.jsx";
 import { useNavigate } from "react-router-dom";
 
@@ -47,10 +59,97 @@ const STATES_LIST = [
   "Puducherry",
 ];
 
-// --- Location Modal Component ---
 const LocationModal = ({ isOpen, onSave }) => {
   const [town, setTown] = useState("");
   const [state, setState] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getLocation = () => {
+      if (!isOpen) return;
+
+      if ("geolocation" in navigator) {
+        setLoading(true);
+
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            try {
+              const { latitude, longitude } = position.coords;
+
+              // Reverse geocoding using OpenStreetMap (no API key needed)
+              const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+              );
+
+              if (response.ok) {
+                const data = await response.json();
+                setTown(
+                  data.address.city ||
+                    data.address.town ||
+                    data.address.village ||
+                    ""
+                );
+                setState(data.address.state || data.address.region || "");
+              }
+            } catch (error) {
+              console.error("Geocoding failed:", error);
+            } finally {
+              setLoading(false);
+            }
+          },
+          (error) => {
+            console.error("Geolocation error:", error);
+            setLoading(false);
+            // Fallback to IP-based location
+            getLocationByIP();
+          },
+          { timeout: 10000, enableHighAccuracy: true }
+        );
+      } else {
+        // Browser doesn't support geolocation, fallback to IP
+        getLocationByIP();
+      }
+    };
+
+    const getLocationByIP = async () => {
+      try {
+        setLoading(true);
+        // Try multiple free IP geolocation services
+        const services = [
+          "https://ipapi.co/json/",
+          "https://freeipapi.com/api/json/",
+          "https://api.ipgeolocation.io/ipgeo?apiKey=free", // This one has a free tier
+        ];
+
+        let locationData = null;
+
+        for (const url of services) {
+          try {
+            const response = await fetch(url);
+            if (response.ok) {
+              locationData = await response.json();
+              break;
+            }
+          } catch (e) {
+            console.log(`Failed with ${url}, trying next...`);
+          }
+        }
+
+        if (locationData) {
+          setTown(locationData.city || "");
+          setState(locationData.region || locationData.region_name || "");
+        }
+      } catch (error) {
+        console.error("IP location failed:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isOpen) {
+      getLocation();
+    }
+  }, [isOpen]);
 
   const handleSave = () => {
     if (town.trim() && state.trim()) {
@@ -62,45 +161,76 @@ const LocationModal = ({ isOpen, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-8 shadow-2xl w-full max-w-sm">
+      {/* Animate modal entry */}
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0, y: 50 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="bg-white rounded-2xl p-8 shadow-2xl w-full max-w-sm relative"
+      >
         <h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800">
           <MapPin className="mr-2 text-green-600" /> Set Your Location
         </h2>
         <p className="text-gray-600 mb-6">
-          Please provide your location for accurate weather and predictions.
+          {loading
+            ? "Detecting your location..."
+            : "We auto-detected your location. Confirm below."}
         </p>
-        <div className="space-y-4">
-          <input
-            type="text"
-            value={town}
-            onChange={(e) => setTown(e.target.value)}
-            placeholder="Enter Town Name (e.g., Jaipur)"
-            className="w-full bg-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
-          />
-          {/* State Dropdown */}
-          <select
-            value={state}
-            onChange={(e) => setState(e.target.value)}
-            className="w-full bg-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
+
+        {/* Animated Loader while fetching */}
+        {loading ? (
+          <motion.div
+            className="flex justify-center items-center py-6"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            transition={{ repeat: Infinity, duration: 1 }}
           >
-            <option value="" disabled>
-              Select a State
-            </option>
-            {STATES_LIST.map((s) => (
-              <option key={s} value={s}>
-                {s}
+            <Loader2 className="animate-spin text-green-600" size={40} />
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-4"
+          >
+            {/* Town Input */}
+            <input
+              type="text"
+              value={town}
+              onChange={(e) => setTown(e.target.value)}
+              placeholder="Enter Town Name"
+              className="w-full bg-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
+            />
+
+            {/* State Dropdown */}
+            <select
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              className="w-full bg-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
+            >
+              <option value="" disabled>
+                Select a State
               </option>
-            ))}
-          </select>
-        </div>
-        <button
+              {STATES_LIST.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </motion.div>
+        )}
+
+        {/* Save Button */}
+        <motion.button
           onClick={handleSave}
-          disabled={!town.trim() || !state.trim()}
+          disabled={!town.trim() || !state.trim() || loading}
+          whileTap={{ scale: 0.95 }}
           className="w-full bg-green-600 hover:bg-green-700 text-white p-3 mt-6 rounded-lg font-bold text-lg disabled:bg-gray-400"
         >
-          Save & Continue
-        </button>
-      </div>
+          {loading ? "Fetching Location..." : "Save & Continue"}
+        </motion.button>
+      </motion.div>
     </div>
   );
 };
@@ -263,13 +393,18 @@ export default function Home() {
   const [isPredictionFormOpen, setIsPredictionFormOpen] = useState(false);
   const [weatherData, setWeatherData] = useState(null);
   const [prediction, setPrediction] = useState(null);
+  const [diseasePrediction, setDiseasePrediction] = useState(null);
+  const [plantImage, setPlantImage] = useState(null);
   const [aiAnswer, setAiAnswer] = useState(
     "Ask me a question about agriculture!"
   );
+  const [messages, setMessages] = useState([]); // <-- NEW
+  const [input, setInput] = useState(""); // <-- NEW
   const [isLoading, setIsLoading] = useState({
     weather: false,
     prediction: false,
     ask: false,
+    disease: false,
   });
   const [userInput, setUserInput] = useState({
     town: "",
@@ -277,9 +412,12 @@ export default function Home() {
     question: "How to improve soil health?",
   });
   const isMounted = useRef(true);
+  const messagesEndRef = useRef(null); // <-- NEW
+  const fileInputRef = useRef(null); // <-- NEW
 
   // --- API Fetching Logic ---
   const fetchWeatherData = async (town) => {
+    console.log(town);
     if (!town) return;
     setIsLoading((prev) => ({ ...prev, weather: true }));
     try {
@@ -296,6 +434,7 @@ export default function Home() {
 
       // Transform the data to the format expected by Weather.jsx
       const transformedWeather = {
+        location_name: data.current.current_conditions.location_name,
         tempC: data.current.current_conditions.temperature_celsius,
         condition: data.current.current_conditions.description,
         rainProbability: data.forecast.forecast[0].rain_chance_percent,
@@ -348,60 +487,187 @@ export default function Home() {
     }
   };
 
-  const askAi = async () => {
-    if (!userInput.question.trim()) return;
+  const askAi = async (question) => {
+    if (!question.trim()) return;
     setIsLoading((prev) => ({ ...prev, ask: true }));
-    setAiAnswer("Thinking...");
     try {
       const response = await fetch(`${API_URL}/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: userInput.question }),
+        body: JSON.stringify({ question: question }),
       });
       if (!response.ok) {
         const err = await response.json();
         throw new Error(err.detail || "AI assistant is currently offline.");
       }
       const data = await response.json();
-      if (isMounted.current) setAiAnswer(data.answer);
+      return data.answer;
     } catch (error) {
       console.error("Error asking AI:", error);
-      if (isMounted.current) setAiAnswer(error.message);
+      return `Error: ${error.message}`;
     } finally {
       if (isMounted.current) setIsLoading((prev) => ({ ...prev, ask: false }));
     }
   };
 
-  // --- Handlers ---
-  const handleLocationSave = (location) => {
-    setUserInput((prev) => ({
-      ...prev,
-      town: location.town,
-      state: location.state,
-    }));
-    fetchWeatherData(location.town);
-    setIsLocationModalOpen(false);
+  const uploadImageAndPredict = async (file) => {
+    if (!file) return;
+
+    setDiseasePrediction(null);
+    setIsLoading((prev) => ({ ...prev, disease: true }));
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(`${API_URL}/detect-disease`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.detail || "Disease detection failed.");
+      }
+      const data = await response.json();
+      if (isMounted.current) {
+        setDiseasePrediction(data);
+      }
+      return data.disease_name;
+    } catch (error) {
+      console.error("Error detecting disease:", error);
+      if (isMounted.current) {
+        setDiseasePrediction({ error: error.message });
+      }
+      return `Error: ${error.message}`;
+    } finally {
+      if (isMounted.current) {
+        setIsLoading((prev) => ({ ...prev, disease: false }));
+      }
+    }
   };
 
-  const handlePredictionClick = () => {
-    if (!userInput.town) {
-      alert("Please set your location first.");
-      return;
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPlantImage(URL.createObjectURL(file));
+      uploadImageAndPredict(file);
     }
-    if (!weatherData) {
-      alert("Please wait for weather data to load.");
-      return;
-    }
-    setIsPredictionFormOpen(true);
   };
 
-  // --- Effects ---
+  // --- NEW: Chat Logic ---
+  const handleSend = async () => {
+    if (!input.trim()) return;
+    const userMessage = {
+      text: input,
+      sender: "farmer",
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+
+    const aiResponse = await askAi(input);
+    const aiMessage = {
+      text: aiResponse,
+      sender: "ai",
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+    setMessages((prev) => [...prev, aiMessage]);
+    scrollToBottom();
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const userMessage = {
+      text: "Image uploaded for analysis.",
+      sender: "farmer",
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+    setMessages((prev) => [...prev, userMessage]);
+
+    const predictionResult = await uploadImageAndPredict(file);
+    const aiMessage = {
+      text: `Prediction: ${predictionResult}`,
+      sender: "ai",
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+    setMessages((prev) => [...prev, aiMessage]);
+    scrollToBottom();
+  };
+
+ const startVoiceInput = () => {
+   // Check for browser support
+   const SpeechRecognition =
+     window.SpeechRecognition || window.webkitSpeechRecognition;
+
+   if (!SpeechRecognition) {
+     alert("Sorry, your browser does not support voice input.");
+     return;
+   }
+
+   const recognition = new SpeechRecognition();
+   recognition.lang = "en-US"; // Set language
+   recognition.interimResults = false; // Final results only
+   recognition.maxAlternatives = 1;
+
+   recognition.start();
+
+   recognition.onresult = (event) => {
+     const transcript = event.results[0][0].transcript;
+     setInput(transcript); // Put the speech into your input box state
+   };
+
+   recognition.onerror = (event) => {
+     console.error("Speech recognition error:", event.error);
+     alert("Error capturing voice input: " + event.error);
+   };
+ };
+
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
     // Cleanup function
     return () => {
       isMounted.current = false;
     };
   }, []);
+
+    const handleLocationSave = (location) => {
+      setUserInput((prev) => ({
+        ...prev,
+        town: location.town,
+        state: location.state,
+      }));
+      fetchWeatherData(location.town);
+      setIsLocationModalOpen(false);
+    };
+    const handlePredictionClick = () => {
+      if (!userInput.town) {
+        alert("Please set your location first.");
+        return;
+      }
+      if (!weatherData) {
+        alert("Please wait for weather data to load.");
+        return;
+      }
+      setIsPredictionFormOpen(true);
+    };
+
 
   return (
     <>
@@ -413,7 +679,7 @@ export default function Home() {
         currentTemp={weatherData?.tempC}
         weatherCondition={weatherData?.condition}
       />
-      <div className="bg-gray-100 min-h-screen p-4 sm:p-6 font-poppins">
+      <div className="w-screen absolute top-0 left-0 bg-gray-100 min-h-screen p-4 sm:p-6 font-poppins">
         {/* Dashboard Nav Bar */}
         <nav className="flex items-center justify-between p-4 bg-white rounded-lg shadow mb-6">
           <div className="flex items-center space-x-2">
@@ -431,7 +697,7 @@ export default function Home() {
           </button>
         </nav>
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 gap-6">
           <div className="lg:col-span-1 flex flex-col gap-6">
             {/* Conditional Rendering for Weather Component */}
             {weatherData && !weatherData.error ? (
@@ -444,88 +710,200 @@ export default function Home() {
                 </p>
               </div>
             )}
-          </div>
 
-          <div className="lg:col-span-2 flex flex-col gap-6">
-            <div className="bg-white p-6 rounded-2xl shadow-lg">
-              <h2 className="text-xl font-bold mb-4 flex items-center text-gray-800">
-                <Leaf className="mr-2 text-green-600" />
-                Yield Prediction
-              </h2>
-              <p className="text-sm text-gray-500 mb-4">
-                Our model is 97% accurate in its predictions.
-              </p>
-              <div className="bg-gray-50 border-2 border-dashed border-gray-200 p-6 rounded-lg text-center min-h-[150px] flex items-center justify-center">
-                {prediction && !prediction.error ? (
-                  <div>
+            <div className="lg:col-span-2 flex flex-col gap-6">
+              <div className="bg-white p-6 rounded-2xl shadow-lg">
+                <h2 className="text-xl font-bold mb-4 flex items-center text-gray-800">
+                  <Leaf className="mr-2 text-green-600" />
+                  Yield Prediction
+                </h2>
+                <p className="text-sm text-gray-500 mb-4">
+                  Our model is 97% accurate in its predictions.
+                </p>
+                <div className="bg-gray-50 border-2 border-dashed border-gray-200 p-6 rounded-lg text-center min-h-[150px] flex items-center justify-center">
+                  {prediction && !prediction.error ? (
+                    <div>
+                      <p className="text-gray-500">
+                        Predicted Yield for {prediction.input_features.Crop}
+                      </p>
+                      <p className="text-5xl font-bold text-green-600 my-2">
+                        {prediction.predicted_yield_tons_per_hectare}
+                        <span className="text-2xl font-normal text-gray-500">
+                          {" "}
+                          tons/ha
+                        </span>
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        Calculated using {prediction.live_rainfall_used_mm}mm of
+                        live rainfall data.
+                      </p>
+                    </div>
+                  ) : (
                     <p className="text-gray-500">
-                      Predicted Yield for {prediction.input_features.Crop}
+                      {prediction?.error ||
+                        "Click the button to generate a yield prediction."}
                     </p>
-                    <p className="text-5xl font-bold text-green-600 my-2">
-                      {prediction.predicted_yield_tons_per_hectare}
-                      <span className="text-2xl font-normal text-gray-500">
-                        {" "}
-                        tons/ha
-                      </span>
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      Calculated using {prediction.live_rainfall_used_mm}mm of
-                      live rainfall data.
-                    </p>
-                  </div>
-                ) : (
-                  <p className="text-gray-500">
-                    {prediction?.error ||
-                      "Click the button to generate a yield prediction."}
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={handlePredictionClick}
-                disabled={
-                  isLoading.prediction || !userInput.town || !weatherData
-                }
-                className="w-full bg-green-600 hover:bg-green-700 text-white p-3 mt-4 rounded-lg font-bold text-lg disabled:bg-gray-400 flex items-center justify-center"
-              >
-                {isLoading.prediction && (
-                  <Loader2 className="animate-spin mr-2" />
-                )}
-                {isLoading.prediction
-                  ? "Calculating..."
-                  : `Predict Yield in ${userInput.town || "your town"}`}
-              </button>
-            </div>
-
-            {/* AI Chatbot Section */}
-            <div className="bg-white p-6 rounded-2xl shadow-lg">
-              <h2 className="text-xl font-bold mb-4 flex items-center text-gray-800">
-                <Bot className="mr-2 text-green-600" />
-                Ask KrishiMitra AI
-              </h2>
-              <div className="flex items-center space-x-2 mb-4">
-                <input
-                  type="text"
-                  value={userInput.question}
-                  onChange={(e) =>
-                    setUserInput((prev) => ({
-                      ...prev,
-                      question: e.target.value,
-                    }))
-                  }
-                  onKeyDown={(e) => e.key === "Enter" && askAi()}
-                  placeholder="e.g., How to control pests?"
-                  className="w-full bg-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
-                />
+                  )}
+                </div>
                 <button
-                  onClick={askAi}
-                  disabled={isLoading.ask}
-                  className="bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg disabled:bg-gray-400 flex-shrink-0"
+                  onClick={handlePredictionClick}
+                  disabled={
+                    isLoading.prediction || !userInput.town || !weatherData
+                  }
+                  className="w-full bg-green-600 hover:bg-green-700 text-black p-3 mt-4 rounded-lg font-bold text-lg disabled:bg-gray-400 flex items-center justify-center"
                 >
-                  {isLoading.ask ? <Loader2 className="animate-spin" /> : "Ask"}
+                  {isLoading.prediction && (
+                    <Loader2 className="animate-spin mr-2" />
+                  )}
+                  {isLoading.prediction
+                    ? "Calculating..."
+                    : `Predict Yield in ${userInput.town || "your town"}`}
                 </button>
               </div>
-              <div className="bg-gray-100 p-4 rounded-lg min-h-[120px] text-gray-700">
-                {aiAnswer}
+
+              {/* NEW: AI Assistant Card */}
+              <div className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col h-[500px]">
+                <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-black p-4">
+                  <h2 className="text-xl font-bold flex items-center">
+                    <Bot className="mr-2" />
+                    KrishiMitra AI Assistant
+                  </h2>
+                </div>
+
+                {/* Chat Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {messages.map((msg, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex ${
+                        msg.sender === "farmer"
+                          ? "justify-end"
+                          : "justify-start"
+                      }`}
+                    >
+                      <div
+                        className={`max-w-xs lg:max-w-md p-3 rounded-2xl ${
+                          msg.sender === "farmer"
+                            ? "bg-green-100 text-green-900 rounded-br-none"
+                            : "bg-purple-100 text-purple-900 rounded-bl-none"
+                        }`}
+                      >
+                        <p>{msg.text}</p>
+                        <span className="text-xs text-black opacity-70 block mt-1 text-right">
+                          {msg.time}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Input Area */}
+                <div className="p-4 border-t border-gray-200">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleImageUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition"
+                      title="Upload image for disease analysis"
+                    >
+                      <ImageIcon className="w-5 h-5 text-green-600" />
+                    </button>
+                    <button
+                      onClick={startVoiceInput}
+                      className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition"
+                      title="Voice input"
+                    >
+                      <Mic className="w-5 h-5 text-blue-600" />
+                    </button>
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                      placeholder="Ask about crops, pests, weather..."
+                      className="flex-1 bg-gray-100 rounded-lg p-3 placeholder:text-black text-black focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                    <button
+                      onClick={handleSend}
+                      disabled={!input.trim()}
+                      className="p-3 bg-gradient-to-r from-green-600 to-emerald-600 text-black rounded-lg disabled:opacity-50 transition"
+                    >
+                      <Send className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    Ask about crops, weather, pests, or upload an image for
+                    disease analysis
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* NEW: Plant Disease Detection Section */}
+            <div className="bg-white p-6 rounded-2xl shadow-lg">
+              <h2 className="text-xl font-bold mb-4 flex items-center text-gray-800">
+                <Camera className="mr-2 text-green-600" />
+                Plant Disease Detection
+              </h2>
+              <div className="bg-gray-50 border-2 border-dashed border-gray-200 p-6 rounded-lg text-center min-h-[150px] flex flex-col items-center justify-center">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                  id="plant-image-upload"
+                />
+                <label
+                  htmlFor="plant-image-upload"
+                  className="cursor-pointer w-full"
+                >
+                  <motion.div
+                    className="p-4 bg-green-100 rounded-full inline-block"
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    <Camera className="w-10 h-10 text-green-600" />
+                  </motion.div>
+                  <p className="mt-4 text-lg font-semibold text-gray-700">
+                    Upload Plant Image
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    JPG, PNG or JPEG format
+                  </p>
+                </label>
+
+                {isLoading.disease ? (
+                  <div className="flex items-center mt-4">
+                    <Loader2 className="animate-spin mr-2" />
+                    <span>Analyzing...</span>
+                  </div>
+                ) : diseasePrediction?.disease_name ? (
+                  <div className="mt-4 text-center">
+                    <p className="text-gray-500">Predicted Disease:</p>
+                    <p className="text-3xl font-bold text-red-600 my-2">
+                      {diseasePrediction.disease_name}
+                    </p>
+                    {plantImage && (
+                      <img
+                        src={plantImage}
+                        alt="Uploaded plant"
+                        className="mt-4 max-w-full rounded-lg shadow-lg"
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 mt-4">
+                    {diseasePrediction?.error ||
+                      "Upload an image of a plant leaf to detect diseases."}
+                  </p>
+                )}
               </div>
             </div>
           </div>
